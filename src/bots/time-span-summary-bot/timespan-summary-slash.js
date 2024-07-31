@@ -1,5 +1,5 @@
 const llog = require('learninglab-log');
-const timeSpanSummaryView = require('./time-span-summary-form-view');
+const timeSpanSummaryView = require('./timespan-summary-form-view');
 
 module.exports = async ({ command, ack, say, client }) => {
     ack();
