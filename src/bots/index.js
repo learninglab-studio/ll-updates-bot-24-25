@@ -1,0 +1,1 @@
+module.exports.timespanSummaryBot = require('./time-span-summary-bot');

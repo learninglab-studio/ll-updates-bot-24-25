@@ -20,18 +20,3 @@ module.exports = async ({ command, ack, say, client }) => {
         llog.red(error)
     }
 }
-
-
-
-async ({ command, ack, client, say }) => {
-    llog.blue("got a command");
-    await ack();
-    try {
-        let udpateResult = await say("working on that update ...");
-        llog.magenta("got a /update request:", command);
-       
-    } catch (error) {
-        console.error(error)
-        return error;
-    }
-}
