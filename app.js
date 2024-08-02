@@ -30,7 +30,7 @@ app.view(/timespan_summary_submission/, bots.timespanSummaryBot.viewSubmission);
 
 app.message("testing testing", messageHandlers.testing);
 app.message(/.*/, messageHandlers.parseAll);
-app.message(process.env.SLACK_BOT_SLACK_ID,  bots.updatesBot.mentioned);
+app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
 
 // app.event("reaction_added", handleEvents.reactionAdded);
 // app.event("reaction_removed", handleEvents.reactionRemoved);
