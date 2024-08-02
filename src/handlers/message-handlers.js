@@ -8,4 +8,3 @@ exports.testing = async ({ message, say }) => {
 exports.parseAll = async ({ client, message, say, event }) => {
     llog.gray(message)
 }
-

@@ -2,7 +2,9 @@ const llog = require('learninglab-log');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-// const { WebClient } = require('@slack/web-api');
+
+
+
 
 module.exports = async ({ ack, body, view, client }) => {
     // Acknowledge the view_submission request
@@ -25,25 +27,41 @@ module.exports = async ({ ack, body, view, client }) => {
 
 
     let allMessages = [];
+    let skippedChannels = [];
 
     for (const channel of selectedChannels) {
-        let hasMore = true;
-        let cursor;
-
-        while (hasMore) {
-            const response = await client.conversations.history({
-                channel: channel,
-                oldest: timespanStart,
-                latest: timespanStop,
-                limit: 1000,
-                cursor: cursor
-            });
-
-            allMessages = allMessages.concat(response.messages);
-
-            hasMore = response.has_more;
-            cursor = response.response_metadata.next_cursor;
+        let isInChannel = false;
+        try {
+            joinResult = await client.conversations.join({ channel: channel });
+            if (joinResult) {
+                isInChannel = true;
+            }
+        } catch (error) {
+            console.error(error);
+            return
         }
+        if (!isInChannel) {
+            skippedChannels.push(channel);
+            continue;
+        } else {
+            let hasMore = true;
+            let cursor;
+            while (hasMore) {
+                const response = await client.conversations.history({
+                    channel: channel,
+                    oldest: timespanStart,
+                    latest: timespanStop,
+                    limit: 1000,
+                    cursor: cursor
+                });
+
+                allMessages = allMessages.concat(response.messages);
+
+                hasMore = response.has_more;
+                cursor = response.response_metadata.next_cursor;
+            }
+        }
+        
     }
 
     // Write the messages to a temporary JSON file
@@ -96,7 +114,7 @@ module.exports = async ({ ack, body, view, client }) => {
             title: path.basename(tempFilePath)
         }],
         channel_id: dmChannelId,
-        initial_comment: `Here are the messages from ${new Date(timespanStart * 1000).toLocaleDateString()} to ${new Date(timespanStop * 1000).toLocaleDateString()}`
+        initial_comment: `Here are the messages from ${new Date(timespanStart * 1000).toLocaleDateString()} to ${new Date(timespanStop * 1000).toLocaleDateString()}. We were unable to get data for ${skippedChannels.join(', ')}.`,
     });
 
     console.log('File uploaded successfully');

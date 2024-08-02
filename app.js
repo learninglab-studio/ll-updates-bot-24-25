@@ -26,9 +26,11 @@ app.command("/update", bots.timespanSummaryBot.slash);
 app.command("/watch", slashHandlers.watch);
 
 app.view(/timespan_summary_submission/, bots.timespanSummaryBot.viewSubmission);
+// app.action()
 
 app.message("testing testing", messageHandlers.testing);
 app.message(/.*/, messageHandlers.parseAll);
+app.message(process.env.SLACK_BOT_SLACK_ID,  bots.updatesBot.mentioned);
 
 // app.event("reaction_added", handleEvents.reactionAdded);
 // app.event("reaction_removed", handleEvents.reactionRemoved);
