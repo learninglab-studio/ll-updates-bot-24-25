@@ -5,7 +5,7 @@ const llog = require("learninglab-log");
 const slashHandlers = require("./src/handlers/slash-handlers")
 const messageHandlers = require("./src/handlers/message-handlers")
 const bots = require("./src/bots");
-
+const { getConfig } = require('./src/bots/config')
 global.ROOT_DIR = path.resolve(__dirname);
 
 require("dotenv").config({
@@ -36,14 +36,33 @@ app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
 // app.event("reaction_removed", handleEvents.reactionRemoved);
 
 (async () => {
-//   const channelConfig = await getAirtableConfig({
-//     baseId: process.env.AIRTABLE_WORK_BASE,
-//     table: "ChannelConfig",
-//   });
-//   llog.yellow(channelConfig);
-//   global.BOT_CONFIG = {
-//     channelConfig: channelConfig,
-//   };
+   const config = await getConfig([
+    {
+      name: "Users",
+      fields: ["Name", "SlackId"]
+    },
+    {
+      name: "Channels",
+      fields: ["ChannelId", "Name", "Description", "CustomFunctions", "CustomFunctionNames"]
+    },
+    {
+      name: "Functions",
+      fields: ["Name", "Notes"]
+    },
+  ])
+  llog.yellow(config);
+
+
+  config.Users.forEach(user => {
+    if (Array.isArray(user.SlackId) && user.SlackId.length > 0) {
+        user.SlackId = user.SlackId[0];
+    }
+  });
+  
+
+  global.BOT_CONFIG = config;
+
+  llog.blue(global.BOT_CONFIG)
   // Check for folders
   if (!fs.existsSync("_temp")) {
     fs.mkdirSync("_temp");

@@ -8,37 +8,41 @@ exports.testing = async ({ message, say }) => {
 
 exports.parseAll = async ({ client, message, say, event }) => {
     llog.gray(message)
+
     let createdBy = null;
     let user = global.BOT_CONFIG.Users.find(user => user.SlackId === message.user);
+
     if (user) {
-        llog.green(`found user`, user)
         createdBy = user.id;
     } else {
-       llog.blue(`couldn't find user`, message.user)
-        try {
-            const userInfo = await client.users.info({ user: message.user });
-            llog.green(`userInfo`, userInfo)
-            const slackUser = userInfo.user;
         // If user is not found, query Airtable to find or add the user
-        const userResult = await at.addRecord({
+        const workerResult = await at.findOneByValue({
             baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
-            table: 'Users',
-            record: {
-                SlackId: message.user,
-                Name: slackUser.real_name || slackUser.name
-            }
+            table: "_WORKERS",
+            field: "SLACK_ID",
+            value: message.user
         });
-        global.BOT_CONFIG.Users.push({
-            id: userResult.id,
-            Name: userResult.fields.Name, // Adjust according to your Airtable fields
-            SlackId: userResult.fields.SlackId
-        });
-        createdBy = userResult.id 
-        } catch (error) {
-            llog.red(error)
-        } 
-        
+
+        if (workerResult) {
+            const userResult = await at.addRecord({
+                baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
+                table: "Users",
+                record: {
+                    _WORKER_RECORD: workerResult.id,
+                    Name: workerResult.fields.SLACK_USERNAME
+                }
+            })
+            createdBy = userResult.id
+            global.BOT_CONFIG.Users.push({
+                id: userResult.id,
+                Name: userResult.fields.Name, // Adjust according to your Airtable fields
+                SlackId: userResult.fields.SlackId
+            });
+        } else {
+            llog.red(`couldn't find user in WORKERS table`)
+        }
     }
+
     const atResult = await at.addRecord({
         baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
         table: "Updates",
