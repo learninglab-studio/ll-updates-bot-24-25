@@ -1,5 +1,6 @@
 const llog = require('learninglab-log');
 const at = require('../utils/ll-airtable-tools');
+const imageToMarkdownBot = require('../bots/image-to-markdown-bot');
 
 exports.testing = async ({ message, say }) => {
     // say() sends a message to the channel where the event was triggered
@@ -52,4 +53,6 @@ exports.parseAll = async ({ client, message, say, event }) => {
             Channel: message.channel
         }
     })
+
+    const imageToMarkdownCheck = await imageToMarkdownBot({ message, client, say })
 }
