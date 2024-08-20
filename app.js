@@ -30,7 +30,7 @@ app.view(/timespan_summary_submission/, bots.timespanSummaryBot.viewSubmission);
 
 app.message("testing testing", messageHandlers.testing);
 app.message(/.*/, messageHandlers.parseAll);
-app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
+// app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
 
 // app.event("reaction_added", handleEvents.reactionAdded);
 // app.event("reaction_removed", handleEvents.reactionRemoved);
@@ -50,6 +50,9 @@ app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
       fields: ["Name", "Notes"]
     },
   ])
+
+  
+
   llog.yellow(config);
 
 
@@ -59,6 +62,7 @@ app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
     }
   });
   
+
 
   global.BOT_CONFIG = config;
 
@@ -72,6 +76,28 @@ app.message(process.env.SLACK_BOT_SLACK_ID, bots.updatesBot.mentioned);
   }
   await app.start(process.env.PORT || 3000);
   llog.yellow("⚡️ Bolt app is running!");
+
+  // let channelsList = await app.client.conversations.list(
+  //   {
+  //     limit: 1000,
+  //     types: "public_channel,private_channel,im,mpim"
+  //   }
+  // )
+
+
+
+  // const memberChannels = channelsList.channels
+  //   .filter(channel => channel.is_member)
+  //   .map(channel => {
+  //     return {
+  //       id: channel.id,
+  //       name: channel.name
+  //     };
+  //   });
+
+  // llog.blue(memberChannels); 
+  // llog.magenta(channelsList.channels.length, memberChannels.length)
+
   let slackResult = await app.client.chat.postMessage({
     channel: process.env.SLACK_LOGGING_CHANNEL,
     text: "starting up the summer work bots",

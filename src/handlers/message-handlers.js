@@ -41,6 +41,7 @@ exports.parseAll = async ({ client, message, say, event }) => {
         } 
         
     }
+
     let atResult;
     const threadCheck = await threadHandlingBot({ message, client, say, updateRecord: atResult, user: createdBy });
     
@@ -79,8 +80,6 @@ exports.parseAll = async ({ client, message, say, event }) => {
         })
     
     }
-
     
-
     const imageToMarkdownCheck = await imageToMarkdownBot({ message, client, say, updateRecord: atResult, user: createdBy })
 }

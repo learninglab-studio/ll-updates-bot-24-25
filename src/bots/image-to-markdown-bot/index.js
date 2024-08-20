@@ -4,8 +4,10 @@ const at = require('../../utils/ll-airtable-tools');
 module.exports = async ({ message, client, say, updateRecord, user }) => {
     magenta(`checking for image on updateRecord`, updateRecord)
     try {
-        if (message.files) {
-            magenta(`handling attachment`)
+        let channelInfo = await client.conversations.info({ channel: message.channel });
+        yellow(channelInfo);
+        if (message.files && channelInfo.channel.is_member) {
+            magenta(`handling attachment because we're a member of that channel`)
             var publicResult
             if (["mp4", "mov"].includes(message.files[0].filetype)) {
                 // if (message.files[0].size < 50000000) {
@@ -19,6 +21,7 @@ module.exports = async ({ message, client, say, updateRecord, user }) => {
                 blue(message)
             } else {
                 try {
+
                     publicResult = await client.files.sharedPublicURL({
                         token: process.env.SLACK_USER_TOKEN,
                         file: message.files[0].id,
@@ -69,7 +72,7 @@ module.exports = async ({ message, client, say, updateRecord, user }) => {
                 
             }
         } else {
-            red("there was no file attached to this message")
+            red("there was no file attached to this message or we aren't a member")
         }
     } catch (error) {
         red(error)
