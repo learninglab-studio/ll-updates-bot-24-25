@@ -1,6 +1,7 @@
 const llog = require('learninglab-log');
 const at = require('../utils/ll-airtable-tools');
 const imageToMarkdownBot = require('../bots/image-to-markdown-bot');
+const threadHandlingBot = require('../bots/thread-handling-bot')
 
 exports.testing = async ({ message, say }) => {
     // say() sends a message to the channel where the event was triggered
@@ -40,19 +41,46 @@ exports.parseAll = async ({ client, message, say, event }) => {
         } 
         
     }
-    const atResult = await at.addRecord({
-        baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
-        table: "Updates",
-        record: {
-            SlackTs: message.ts,
-            SlackJson: JSON.stringify(message, null, 4),
-            ThreadTs: message.thread_ts ? message.thread_ts : message.ts,
-            Text: message.text,
-            User: [createdBy],
-            SlackUserId: message.user,
-            Channel: message.channel
-        }
-    })
+    let atResult;
+    const threadCheck = await threadHandlingBot({ message, client, say, updateRecord: atResult, user: createdBy });
+    
+    
+    if (threadCheck) {
+        atResult = await at.addRecord({
+            baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
+            table: "Updates",
+            record: {
+                SlackTs: message.ts,
+                SlackJson: JSON.stringify(message, null, 4),
+                ThreadTs: message.thread_ts,
+                Text: message.text,
+                User: [createdBy],
+                SlackUserId: message.user,
+                Channel: message.channel,
+                RelatedUpdates: [threadCheck.id],
+                Type: "Reply"
+            }
+        })
+        
+    } else {
+        atResult = await at.addRecord({
+            baseId: process.env.AIRTABLE_UPDATES_BASE_ID,
+            table: "Updates",
+            record: {
+                SlackTs: message.ts,
+                SlackJson: JSON.stringify(message, null, 4),
+                ThreadTs: message.ts,
+                Text: message.text,
+                User: [createdBy],
+                SlackUserId: message.user,
+                Channel: message.channel,
+                Type: "Message"
+            }
+        })
+    
+    }
 
-    const imageToMarkdownCheck = await imageToMarkdownBot({ message, client, say })
+    
+
+    const imageToMarkdownCheck = await imageToMarkdownBot({ message, client, say, updateRecord: atResult, user: createdBy })
 }

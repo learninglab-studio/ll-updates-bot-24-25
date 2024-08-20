@@ -1,8 +1,8 @@
 const { yellow, grey, red, cyan, blue, magenta, divider } = require("learninglab-log")
 const at = require('../../utils/ll-airtable-tools');
 
-module.exports = async ({ message, client, say }) => {
-    magenta(`checking for image`)
+module.exports = async ({ message, client, say, updateRecord, user }) => {
+    magenta(`checking for image on updateRecord`, updateRecord)
     try {
         if (message.files) {
             magenta(`handling attachment`)
@@ -41,7 +41,9 @@ module.exports = async ({ message, client, say }) => {
                             ],
                             "SlackUrl": makeSlackImageURL(message.files[0].permalink, message.files[0].permalink_public),
                             "PostedBySlackUser": message.files[0].user,
-                            "SlackTs": message.event_ts
+                            "SlackTs": message.event_ts,
+                            "Updates": [updateRecord.id],
+                            "User": [user]
                         }
                     }
                     magenta(divider)
